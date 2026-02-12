@@ -112,6 +112,7 @@
             cursor: pointer;
             transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
             background: var(--bg-secondary);
+            margin-bottom: 30px;
         }
 
         .upload-zone:hover {
@@ -146,6 +147,20 @@
 
         #fileInput {
             display: none;
+        }
+
+        /* Estilos para o botão de exemplo */
+        .example-block {
+            text-align: center;
+            margin-top: 10px;
+        }
+        
+        .example-label {
+            display: block;
+            margin-bottom: 12px;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            letter-spacing: 0.05em;
         }
 
         .stats-bar {
@@ -191,8 +206,9 @@
         }
 
         .export-btn {
-            display: flex;
+            display: inline-flex;
             align-items: center;
+            justify-content: center;
             gap: 8px;
             padding: 12px 24px;
             background: transparent;
@@ -203,6 +219,8 @@
             font-size: 0.85rem;
             cursor: pointer;
             transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
         }
 
         .export-btn:hover {
@@ -515,6 +533,13 @@
                 <p class="upload-hint">or click to browse (.txt or .nbib format)</p>
                 <input type="file" id="fileInput" accept=".txt,.nbib">
             </div>
+
+            <div class="example-block">
+                <span class="example-label">OR VIEW DEMO</span>
+                <button id="loadExampleBtn" class="export-btn">
+                    Load Example (Helder Nakaya 2025)
+                </button>
+            </div>
         </section>
 
         <div class="stats-bar" id="statsBar">
@@ -559,7 +584,7 @@
         </section>
 
         <footer>
-            <a href="https://csbiology.org" target="_blank" rel="noopener noreferrer">Developed by Helder Nakaya</a>
+            <a href="https://hylix.app/" target="_blank" rel="noopener noreferrer">Developed by Hylix Insights</a>
         </footer>
     </div>
 
@@ -589,6 +614,7 @@
         const timelineContainer = document.getElementById('timelineContainer');
         const timeSlider = document.getElementById('timeSlider');
         const tooltip = document.getElementById('tooltip');
+        const loadExampleBtn = document.getElementById('loadExampleBtn');
 
         uploadZone.addEventListener('click', () => fileInput.click());
         
@@ -611,6 +637,31 @@
         fileInput.addEventListener('change', (e) => {
             const file = e.target.files[0];
             if (file) processFile(file);
+        });
+
+        // Event listener para o botão de carregar exemplo
+        loadExampleBtn.addEventListener('click', () => {
+            // Tenta carregar o arquivo que deve estar no mesmo diretório
+            fetch('pubmed-heldernaka-2025.txt')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`Erro HTTP: ${response.status}`);
+                    }
+                    return response.text();
+                })
+                .then(content => {
+                    articles = parsePubMed(content);
+                    if (articles.length > 0) {
+                        uploadSection.classList.add('hidden');
+                        displayTimeline();
+                    } else {
+                        alert('O arquivo de exemplo está vazio ou fora do formato PubMed.');
+                    }
+                })
+                .catch(err => {
+                    console.error('Erro ao carregar exemplo:', err);
+                    alert('Erro ao carregar o arquivo de exemplo. Certifique-se de que "pubmed-heldernaka-2025.txt" está na mesma pasta do repositório. Nota: Esta função pode não funcionar se você estiver apenas abrindo o arquivo localmente sem um servidor web, mas funcionará no GitHub Pages.');
+                });
         });
 
         function processFile(file) {
